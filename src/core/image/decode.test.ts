@@ -25,4 +25,10 @@ describe('decodeImage', () => {
     await expect(decodeImage(garbage, 'png')).rejects.toMatchObject({ code: 'CORRUPT_FILE' });
     await expect(decodeImage(garbage, 'png')).rejects.toBeInstanceOf(ToolError);
   });
+
+  it('maps libheif failures on corrupt HEIC bytes to CORRUPT_FILE', async () => {
+    const garbage = toBlob(new Uint8Array([0, 0, 0, 24, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63, 1, 2, 3, 4]));
+    await expect(decodeImage(garbage, 'heic')).rejects.toMatchObject({ code: 'CORRUPT_FILE' });
+    await expect(decodeImage(garbage, 'heic')).rejects.toBeInstanceOf(ToolError);
+  });
 });
