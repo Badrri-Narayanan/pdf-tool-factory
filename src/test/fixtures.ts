@@ -1,3 +1,5 @@
+import { PDFDocument, StandardFonts } from 'pdf-lib';
+
 /** Inserts a minimal little-endian EXIF APP1 segment with one Orientation tag right after SOI. */
 export function withExifOrientation(jpeg: Uint8Array, orientation: number): Uint8Array {
   const app1 = new Uint8Array([
@@ -91,4 +93,25 @@ export async function readPixel(bytes: Uint8Array, x: number, y: number): Promis
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(bitmap, 0, 0);
   return [...ctx.getImageData(x, y, 1, 1).data];
+}
+
+export async function makePdf(pageCount: number, size: [number, number] = [300, 400]): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < pageCount; i++) doc.addPage(size);
+  return doc.save();
+}
+
+export async function makeTextPdf(): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  doc.addPage([300, 400]).drawText('Hello, plain text only.', { x: 20, y: 360, size: 14, font });
+  return doc.save();
+}
+
+/** Not truly encrypted, but carries an /Encrypt trailer entry so pdf-lib treats it as password-protected. */
+export async function makeEncryptedPdf(): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  doc.addPage([300, 400]);
+  doc.context.trailerInfo.Encrypt = doc.context.obj({ Filter: 'Standard', V: 1, R: 2 });
+  return doc.save({ useObjectStreams: false });
 }
