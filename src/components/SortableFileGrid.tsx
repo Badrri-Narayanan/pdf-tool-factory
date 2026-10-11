@@ -5,7 +5,7 @@ import { FileCard } from './FileCard';
 
 interface Props {
   items: FileItem[];
-  onMove(activeId: string, overId: string): void;
+  onMove?(activeId: string, overId: string): void;
   onRemove(id: string): void;
   onRotate?(id: string): void;
 }
@@ -17,7 +17,7 @@ export function SortableFileGrid({ items, onMove, onRemove, onRotate }: Props) {
   );
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (over && active.id !== over.id) onMove(String(active.id), String(over.id));
+    if (over && active.id !== over.id) onMove?.(String(active.id), String(over.id));
   };
 
   return (
@@ -25,7 +25,7 @@ export function SortableFileGrid({ items, onMove, onRemove, onRotate }: Props) {
       <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
         <ul aria-label="Selected files" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
-            <FileCard key={item.id} item={item} onRemove={onRemove} onRotate={onRotate} />
+            <FileCard key={item.id} item={item} onRemove={onRemove} onRotate={onRotate} reorderable={Boolean(onMove)} />
           ))}
         </ul>
       </SortableContext>

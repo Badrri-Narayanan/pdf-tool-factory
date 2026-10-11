@@ -8,10 +8,12 @@ import { formatBytes } from '../lib/format';
 interface Props {
   item: FileItem;
   onRemove(id: string): void;
+  /** Reordering is only offered when the grid supports it. */
+  reorderable?: boolean;
   onRotate?(id: string): void;
 }
 
-export function FileCard({ item, onRemove, onRotate }: Props) {
+export function FileCard({ item, onRemove, onRotate, reorderable = true }: Props) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const [thumbFailed, setThumbFailed] = useState(false);
   const name = item.file.name;
@@ -40,23 +42,25 @@ export function FileCard({ item, onRemove, onRotate }: Props) {
         )}
       </div>
       <div className="flex items-start gap-1 p-2">
-        <button
-          ref={setActivatorNodeRef}
-          type="button"
-          aria-label={`Reorder ${name}`}
-          className="flex size-11 shrink-0 touch-none cursor-grab items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical aria-hidden className="size-5" />
-        </button>
+        {reorderable && (
+          <button
+            ref={setActivatorNodeRef}
+            type="button"
+            aria-label={`Reorder ${name}`}
+            className="flex size-11 shrink-0 touch-none cursor-grab items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical aria-hidden className="size-5" />
+          </button>
+        )}
         <div className="min-w-0 flex-1 py-1">
           <p className="truncate text-sm font-medium" title={name}>{name}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {item.pageCount !== undefined && `${item.pageCount} ${item.pageCount === 1 ? 'page' : 'pages'} · `}
             {formatBytes(item.file.size)}
           </p>
-          {item.status === 'error' && <p className="mt-1 text-xs text-red-600">{item.error}</p>}
+          {item.status === 'error' && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{item.error}</p>}
         </div>
       </div>
       <div className="absolute right-1 top-1 flex gap-1">
