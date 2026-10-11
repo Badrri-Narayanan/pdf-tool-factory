@@ -10,9 +10,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "verify": "npm run lint && npm test && npm run build && npm run test:e2e"
+    "verify": "npm run lint && npm test && npm run build && npm run test:e2e",
+    "predev": "node scripts/copy-ghostscript.mjs",
+    "prebuild": "node scripts/copy-ghostscript.mjs",
+    "pretest": "node scripts/copy-ghostscript.mjs"
   },
   "dependencies": {
+    "@jspawn/ghostscript-wasm": "^0.0.2",
     "libheif-js": "^1.23.5",
     "lucide-react": "^1.55.0",
     "pdf-lib": "^1.17.1",
