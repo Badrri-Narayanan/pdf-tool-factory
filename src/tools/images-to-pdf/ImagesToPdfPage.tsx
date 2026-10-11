@@ -77,7 +77,7 @@ export default function ImagesToPdfPage() {
       {items.length > 0 && (
         <SortableFileGrid items={items} onMove={edit(files.move)} onRemove={edit(files.remove)} onRotate={edit(files.rotate)} />
       )}
-      {hasErrors && <p className="text-sm text-red-600">Remove the files marked in red to continue.</p>}
+      {hasErrors && <p className="text-sm text-red-600 dark:text-red-400">Remove the files marked in red to continue.</p>}
 
       <div className="space-y-5">
         <OptionGroup
