@@ -82,7 +82,6 @@ export default function CompressPdfPage() {
       {item && (
         <SortableFileGrid
           items={items}
-          onMove={() => {}}
           onRemove={(id) => {
             job.reset();
             files.remove(id);
@@ -102,7 +101,14 @@ export default function CompressPdfPage() {
 
       {job.state.status === 'running' && <ProgressBar value={job.state.progress} label={progressLabel} />}
       {job.state.status === 'error' && (
-        <ErrorBanner message={ERROR_MESSAGES[job.state.code]} onRetry={job.state.fileIndex === undefined ? start : undefined} />
+        <ErrorBanner
+          message={
+            job.state.fileIndex !== undefined
+              ? 'This PDF could not be used. It is marked in red above.'
+              : ERROR_MESSAGES[job.state.code]
+          }
+          onRetry={job.state.fileIndex === undefined ? start : undefined}
+        />
       )}
       {result && done && (
         <ResultPanel

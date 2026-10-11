@@ -49,4 +49,10 @@ describe('workers', () => {
     const messages = await runWorker<CompressResult>(worker, { file: pdfFile(await makePdf(1), 'a.pdf'), level: 'light', baseUrl: `${location.origin}/` });
     expect(messages.at(-1)).toMatchObject({ type: 'done', result: { usedOriginal: true } });
   });
+
+  it('compress worker attaches file index 0 to an encrypted PDF error', async () => {
+    const worker = new Worker(new URL('./compress-pdf.worker.ts', import.meta.url), { type: 'module' });
+    const messages = await runWorker(worker, { file: pdfFile(await makeEncryptedPdf(), 'locked.pdf'), level: 'light', baseUrl: `${location.origin}/` });
+    expect(messages.at(-1)).toMatchObject({ type: 'error', code: 'ENCRYPTED_PDF', fileIndex: 0 });
+  });
 });
