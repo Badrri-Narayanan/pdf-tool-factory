@@ -8,6 +8,10 @@ const router = createHashRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
+      {
+        path: 'images-to-pdf',
+        lazy: async () => ({ Component: (await import('../tools/images-to-pdf/ImagesToPdfPage')).default }),
+      },
       { path: '*', element: <NotFound /> },
     ],
   },
