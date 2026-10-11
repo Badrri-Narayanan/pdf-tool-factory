@@ -55,7 +55,7 @@ export function DropZone({ accept, multiple, label, hint, onFiles }: Props) {
         >
           {label}
         </button>
-        <p className="text-sm text-slate-500">{hint}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{hint}</p>
         <input
           ref={inputRef}
           type="file"

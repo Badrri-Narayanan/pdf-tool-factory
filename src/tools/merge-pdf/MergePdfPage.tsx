@@ -62,7 +62,7 @@ export default function MergePdfPage() {
       <DropZone accept="application/pdf,.pdf" multiple label="Choose PDFs" hint="You can also drop PDFs anywhere on this page." onFiles={edit(files.add)} />
 
       {items.length > 0 && <SortableFileGrid items={items} onMove={edit(files.move)} onRemove={edit(files.remove)} />}
-      {hasErrors && <p className="text-sm text-red-600">Remove the files marked in red to continue.</p>}
+      {hasErrors && <p className="text-sm text-red-600 dark:text-red-400">Remove the files marked in red to continue.</p>}
       {items.length === 1 && !hasErrors && <p className="text-sm text-slate-600 dark:text-slate-400">Add at least 2 PDFs to merge.</p>}
 
       {job.state.status === 'running' && <ProgressBar value={job.state.progress} label="Merging" />}

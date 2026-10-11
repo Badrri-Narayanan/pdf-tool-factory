@@ -18,7 +18,7 @@ export function ToolLayout({ title, description, children, action }: Props) {
         </Link>
         <h1 className="text-2xl font-bold sm:text-3xl">{title}</h1>
         <p className="text-slate-600 dark:text-slate-400">{description}</p>
-        <p className="flex items-center gap-2 text-xs text-slate-500">
+        <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <Lock aria-hidden className="size-3.5 text-emerald-600" />
           Files are processed on your device. Nothing is uploaded.
         </p>
