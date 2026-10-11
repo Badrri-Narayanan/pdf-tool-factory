@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFNumber, PDFRawStream, StandardFonts } from 'pdf-lib';
 
 /** Inserts a minimal little-endian EXIF APP1 segment with one Orientation tag right after SOI. */
 export function withExifOrientation(jpeg: Uint8Array, orientation: number): Uint8Array {
@@ -114,4 +114,35 @@ export async function makeEncryptedPdf(): Promise<Uint8Array> {
   doc.addPage([300, 400]);
   doc.context.trailerInfo.Encrypt = doc.context.obj({ Filter: 'Standard', V: 1, R: 2 });
   return doc.save({ useObjectStreams: false });
+}
+
+export async function makeImagePdf(
+  image: Uint8Array,
+  format: 'png' | 'jpeg',
+  pagePt: [number, number] = [200, 150],
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const embedded = format === 'jpeg' ? await doc.embedJpg(image) : await doc.embedPng(image);
+  doc.addPage(pagePt).drawImage(embedded, { x: 0, y: 0, width: pagePt[0], height: pagePt[1] });
+  return doc.save();
+}
+
+export async function imageStreams(pdf: Uint8Array) {
+  const doc = await PDFDocument.load(pdf);
+  return doc.context
+    .enumerateIndirectObjects()
+    .map(([, obj]) => obj)
+    .filter((obj): obj is PDFRawStream => obj instanceof PDFRawStream && obj.dict.get(PDFName.of('Subtype')) === PDFName.of('Image'))
+    .filter((stream) => !isSoftMask(doc, stream))
+    .map((stream) => ({
+      width: (stream.dict.lookup(PDFName.of('Width')) as PDFNumber).asNumber(),
+      filter: String(stream.dict.lookup(PDFName.of('Filter'))),
+      hasSMask: stream.dict.has(PDFName.of('SMask')),
+    }));
+}
+
+function isSoftMask(doc: PDFDocument, candidate: PDFRawStream): boolean {
+  return doc.context
+    .enumerateIndirectObjects()
+    .some(([, obj]) => obj instanceof PDFRawStream && doc.context.lookup(obj.dict.get(PDFName.of('SMask'))) === candidate);
 }
