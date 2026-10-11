@@ -24,7 +24,7 @@ export function ResultPanel({ file, children, onReset }: Props) {
         {canShareFile(file) && (
           <button
             type="button"
-            onClick={() => void shareFile(file)}
+            onClick={() => void shareFile(file).catch(() => {})}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 font-medium dark:border-slate-700 dark:bg-slate-900"
           >
             <Share2 aria-hidden className="size-4" /> Share

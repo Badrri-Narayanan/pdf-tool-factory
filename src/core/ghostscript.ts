@@ -12,7 +12,8 @@ type CreateGhostscript = (options: Record<string, unknown>) => Promise<Ghostscri
 
 const ENGINE_DIR = 'vendor/ghostscript/';
 // /ebook alone only downsamples images above ~225 dpi and passes JPEGs through untouched, so typical
-// scans would not shrink. The explicit image settings make Maximum at least as aggressive as Medium.
+// scans would not shrink. PassThroughJPEGImages=false forces JPEGs to be re-encoded, and the explicit
+// 120-dpi downsampling with threshold 1.0 resamples every image above 120 dpi, matching Medium.
 const ARGS = [
   '-sDEVICE=pdfwrite',
   '-dCompatibilityLevel=1.5',
@@ -26,7 +27,6 @@ const ARGS = [
   '-dGrayImageDownsampleType=/Bicubic',
   '-dGrayImageResolution=120',
   '-dGrayImageDownsampleThreshold=1.0',
-  '-dJPEGQ=60',
   '-dNOPAUSE',
   '-dQUIET',
   '-dBATCH',
