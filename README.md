@@ -37,6 +37,8 @@ Node >= 22.13 (required by pdfjs-dist 6).
 
 Build with `npm run build` and serve `dist/` from any static host. Use a host that honours `public/_headers` (Cloudflare Pages, Netlify) so Web Workers also receive the CSP. Hosts without custom headers, such as GitHub Pages, only get the meta-tag CSP, which does not cover workers. HTTPS is required for install, offline use and sharing.
 
+This repo deploys to GitHub Pages through `.github/workflows/deploy.yml` on every push to `main` (Settings → Pages → Source: GitHub Actions). The workflow builds, runs the privacy check, and publishes `dist/`. The app uses relative paths and a hash router, so it works under the `/pdf-tool-factory/` sub-path.
+
 ## Third-party licences
 
 - Ghostscript (wasm, `@jspawn/ghostscript-wasm`): AGPL-3.0. Fine for personal self-hosting; revisit before distributing.
