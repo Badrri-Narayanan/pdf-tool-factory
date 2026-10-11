@@ -8,7 +8,7 @@ const BASE = `${location.origin}/`;
 
 describe('ghostscriptCompress', () => {
   it('produces a smaller, valid PDF and reports progress', { timeout: 120_000 }, async () => {
-    const pdf = await makeImagePdf(await makeNoiseImage('jpeg', 1200, 900), 'jpeg');
+    const pdf = await makeImagePdf(await makeNoiseImage('jpeg', 1200, 900), 'jpeg', [612, 792]);
     const onProgress = vi.fn();
     const output = await ghostscriptCompress(pdf, BASE, onProgress);
     expect(output.length).toBeLessThan(pdf.length);
@@ -26,7 +26,7 @@ describe('ghostscriptCompress', () => {
 
 describe('compressPdf (maximum)', () => {
   it('uses Ghostscript and requires the base URL', { timeout: 120_000 }, async () => {
-    const pdf = await makeImagePdf(await makeNoiseImage('jpeg', 1200, 900), 'jpeg');
+    const pdf = await makeImagePdf(await makeNoiseImage('jpeg', 1200, 900), 'jpeg', [612, 792]);
     await expect(compressPdf(pdf, 'maximum')).rejects.toMatchObject({ code: 'ENGINE_LOAD_FAILED' });
     const result = await compressPdf(pdf, 'maximum', { ghostscriptBaseUrl: BASE });
     expect(result.usedOriginal).toBe(false);

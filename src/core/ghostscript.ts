@@ -11,10 +11,22 @@ interface GhostscriptModule {
 type CreateGhostscript = (options: Record<string, unknown>) => Promise<GhostscriptModule>;
 
 const ENGINE_DIR = 'vendor/ghostscript/';
+// /ebook alone only downsamples images above ~225 dpi and passes JPEGs through untouched, so typical
+// scans would not shrink. The explicit image settings make Maximum at least as aggressive as Medium.
 const ARGS = [
   '-sDEVICE=pdfwrite',
   '-dCompatibilityLevel=1.5',
   '-dPDFSETTINGS=/ebook',
+  '-dPassThroughJPEGImages=false',
+  '-dDownsampleColorImages=true',
+  '-dColorImageDownsampleType=/Bicubic',
+  '-dColorImageResolution=120',
+  '-dColorImageDownsampleThreshold=1.0',
+  '-dDownsampleGrayImages=true',
+  '-dGrayImageDownsampleType=/Bicubic',
+  '-dGrayImageResolution=120',
+  '-dGrayImageDownsampleThreshold=1.0',
+  '-dJPEGQ=60',
   '-dNOPAUSE',
   '-dQUIET',
   '-dBATCH',
