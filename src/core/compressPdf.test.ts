@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFNumber, PDFRawStream } from 'pdf-lib';
 import { compressPdf } from './compressPdf';
-import { imageStreams, makeEncryptedPdf, makeImagePdf, makeNoiseImage, makeTextPdf, makeTransparentPng } from '../test/fixtures';
+import { imageStreams, makeEncryptedPdf, makeImagePdf, makeNoisyAlphaPng, makeNoiseImage, makeTextPdf, makeTransparentPng } from '../test/fixtures';
 
 describe('compressPdf (light/medium)', () => {
   it('shrinks a photo-heavy PDF and keeps it valid', async () => {
@@ -48,7 +48,34 @@ describe('compressPdf (light/medium)', () => {
     expect(image.filter).not.toBe('/DCTDecode');
   });
 
+  it('never re-encodes soft-mask images, even without /Decode', async () => {
+    const source = await makeImagePdf(await makeNoisyAlphaPng(400, 300), 'png');
+    const doc = await PDFDocument.load(source);
+    const smasks = softMasks(doc);
+    expect(smasks).toHaveLength(1);
+    smasks[0].dict.delete(PDFName.of('Decode'));
+    const pdf = await doc.save();
+
+    const result = await compressPdf(pdf, 'medium');
+    const [mask] = softMasks(await PDFDocument.load(result.bytes));
+    expect(String(mask.dict.lookup(PDFName.of('Filter')))).toBe('/FlateDecode');
+    expect(String(mask.dict.lookup(PDFName.of('ColorSpace')))).toBe('/DeviceGray');
+    expect((mask.dict.lookup(PDFName.of('Width')) as PDFNumber).asNumber()).toBe(400);
+  });
+
   it('rejects password-protected PDFs', async () => {
     await expect(compressPdf(await makeEncryptedPdf(), 'light')).rejects.toMatchObject({ code: 'ENCRYPTED_PDF' });
   });
 });
+
+function softMasks(doc: PDFDocument): PDFRawStream[] {
+  const { context } = doc;
+  return context
+    .enumerateIndirectObjects()
+    .map(([, obj]) => obj)
+    .filter((obj): obj is PDFRawStream => obj instanceof PDFRawStream)
+    .flatMap((obj) => {
+      const target = context.lookup(obj.dict.get(PDFName.of('SMask')));
+      return target instanceof PDFRawStream ? [target] : [];
+    });
+}

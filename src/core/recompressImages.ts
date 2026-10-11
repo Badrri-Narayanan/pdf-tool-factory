@@ -1,4 +1,4 @@
-import { PDFArray, PDFBool, PDFName, PDFNumber, PDFRawStream, PDFStream, type PDFContext, type PDFObject, type PDFRef } from 'pdf-lib';
+import { PDFArray, PDFBool, PDFName, PDFNumber, PDFRawStream, PDFRef, PDFStream, type PDFContext, type PDFObject } from 'pdf-lib';
 import { readJpegOrientation } from './image/exif';
 import { encodeCanvas, renderBitmap } from './image/render';
 import { loadPdf } from './pdf';
@@ -33,9 +33,14 @@ export async function recompressImages(
       return obj instanceof PDFRawStream && obj.dict.get(name('Subtype')) === name('Image');
     });
 
+  const maskRefs = maskTargets(images);
   let replaced = 0;
   for (let i = 0; i < images.length; i++) {
     const [ref, stream] = images[i];
+    if (maskRefs.has(ref)) {
+      onProgress((i + 1) / images.length);
+      continue;
+    }
     const replacement = await recompressImage(stream, doc.context, maxEdgePx, settings.quality);
     if (replacement) {
       doc.context.assign(ref, replacement);
@@ -46,6 +51,18 @@ export async function recompressImages(
   // Re-saving an untouched document can shift its size by a few bytes either way; return it as-is instead.
   if (replaced === 0) return pdf;
   return doc.save({ useObjectStreams: true });
+}
+
+/** Refs used as /SMask or /Mask streams. They must stay DeviceGray, so they are never re-encoded. */
+function maskTargets(images: [PDFRef, PDFRawStream][]): Set<PDFRef> {
+  const targets = new Set<PDFRef>();
+  for (const [, stream] of images) {
+    for (const key of ['SMask', 'Mask']) {
+      const value = stream.dict.get(name(key));
+      if (value instanceof PDFRef) targets.add(value);
+    }
+  }
+  return targets;
 }
 
 async function recompressImage(
