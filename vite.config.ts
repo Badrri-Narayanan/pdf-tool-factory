@@ -2,6 +2,13 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
+
+const gsVersion = (
+  JSON.parse(readFileSync(new URL('./node_modules/@jspawn/ghostscript-wasm/package.json', import.meta.url), 'utf8')) as {
+    version: string;
+  }
+).version;
 
 export const CSP = [
   "default-src 'self'",
@@ -60,7 +67,7 @@ export default defineConfig({
           {
             urlPattern: ({ url }) => url.pathname.includes('/vendor/ghostscript/'),
             handler: 'CacheFirst',
-            options: { cacheName: 'ghostscript', expiration: { maxEntries: 8 } },
+            options: { cacheName: `ghostscript-${gsVersion}`, expiration: { maxEntries: 8 } },
           },
         ],
       },
