@@ -16,6 +16,10 @@ const router = createHashRouter([
         path: 'merge-pdf',
         lazy: async () => ({ Component: (await import('../tools/merge-pdf/MergePdfPage')).default }),
       },
+      {
+        path: 'compress-pdf',
+        lazy: async () => ({ Component: (await import('../tools/compress-pdf/CompressPdfPage')).default }),
+      },
       { path: '*', element: <NotFound /> },
     ],
   },
