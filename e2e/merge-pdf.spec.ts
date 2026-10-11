@@ -34,6 +34,16 @@ test('a file that is not a PDF is flagged', async ({ page }) => {
     await makePdfFile(1, 'b.pdf'),
     { name: 'fake.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not really a pdf') },
   ]);
+  await expect(page.getByText("This file type isn't supported.")).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Merge PDFs' })).toBeDisabled();
+});
+
+test('a file with a PDF header but broken content is reported as damaged', async ({ page }) => {
+  await page.getByLabel('Choose PDFs').setInputFiles([
+    await makePdfFile(1, 'a.pdf'),
+    await makePdfFile(1, 'b.pdf'),
+    { name: 'broken.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7\ngarbage garbage garbage') },
+  ]);
   await expect(page.getByText("This file looks damaged and can't be read.")).toBeVisible();
   await expect(page.getByRole('button', { name: 'Merge PDFs' })).toBeDisabled();
 });
