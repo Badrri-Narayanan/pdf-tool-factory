@@ -29,6 +29,11 @@ describe('inspectPdf', () => {
   });
 
   it('rejects a file that is not a PDF', async () => {
-    await expect(inspectPdf(file(new TextEncoder().encode('nope'), 'a.pdf'))).rejects.toMatchObject({ code: 'CORRUPT_FILE' });
+    await expect(inspectPdf(file(new TextEncoder().encode('nope'), 'a.pdf'))).rejects.toMatchObject({ code: 'UNSUPPORTED_FORMAT' });
+  });
+
+  it('reports a file with a PDF header but garbage content as damaged', async () => {
+    const bytes = new TextEncoder().encode('%PDF-1.7\ngarbage garbage garbage');
+    await expect(inspectPdf(file(bytes, 'a.pdf'))).rejects.toMatchObject({ code: 'CORRUPT_FILE' });
   });
 });

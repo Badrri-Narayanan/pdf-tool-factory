@@ -14,6 +14,8 @@ export const inspectImage: Inspector = async (file) => {
 };
 
 export const inspectPdf: Inspector = async (file) => {
+  const head = new TextDecoder('latin1').decode(await file.slice(0, 1024).arrayBuffer());
+  if (!head.includes('%PDF-')) throw new ToolError('UNSUPPORTED_FORMAT', 'Not a PDF.');
   const { getDocument } = await loadPdfjs();
   // useWasm: false keeps pdf.js from fetching its optional wasm decoders.
   const task = getDocument({ data: new Uint8Array(await file.arrayBuffer()), useWasm: false });

@@ -45,3 +45,11 @@ test('adding a second file replaces the first', async ({ page }) => {
   await expect(page.getByText('two.pdf')).toBeVisible();
   await expect(page.getByText('one.pdf')).toHaveCount(0);
 });
+
+test('a non-PDF file is rejected as unsupported', async ({ page }) => {
+  await page.getByLabel('Choose a PDF').setInputFiles([
+    { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('shopping list') },
+  ]);
+  await expect(page.getByText("This file type isn't supported.")).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Compress PDF' })).toBeDisabled();
+});
