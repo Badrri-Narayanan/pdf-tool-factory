@@ -1,2 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+coverage
+test-results
+playwright-report
+__screenshots__
+.DS_Store
 docs/superpowers/
 hook-debug.log
+public/vendor/
