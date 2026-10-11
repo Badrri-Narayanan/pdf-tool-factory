@@ -60,6 +60,21 @@ export async function makeNoiseImage(type: 'png' | 'jpeg', width: number, height
   return canvasBytes(canvas, `image/${type}`, 1);
 }
 
+/** PNG with random RGB and random alpha in 1..254, so its soft mask is large and incompressible. */
+export async function makeNoisyAlphaPng(width: number, height: number): Promise<Uint8Array> {
+  const canvas = new OffscreenCanvas(width, height);
+  const ctx = canvas.getContext('2d')!;
+  const image = ctx.createImageData(width, height);
+  for (let i = 0; i < image.data.length; i += 4) {
+    image.data[i] = Math.random() * 255;
+    image.data[i + 1] = Math.random() * 255;
+    image.data[i + 2] = Math.random() * 255;
+    image.data[i + 3] = 1 + Math.floor(Math.random() * 254);
+  }
+  ctx.putImageData(image, 0, 0);
+  return canvasBytes(canvas, 'image/png');
+}
+
 /** 24-bit bottom-up BMP filled with blue. */
 export function makeBmp(width: number, height: number): Uint8Array {
   const rowSize = Math.ceil((width * 3) / 4) * 4;
