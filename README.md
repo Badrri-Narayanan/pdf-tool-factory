@@ -1,75 +1,45 @@
-# React + TypeScript + Vite
+# PDF Tool Factory
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A private, client-side PDF and image toolkit that runs entirely in the browser and installs as an offline PWA.
 
-Currently, two official plugins are available:
+- **Images to PDF** - combine JPEG, PNG, WebP, GIF, BMP and HEIC/HEIF photos into one PDF (page size, orientation, margins, quality).
+- **Merge PDFs** - join several PDFs in the order you choose.
+- **Compress PDF** - Light, Medium or Maximum (Ghostscript, downloaded on demand) compression.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Privacy model
 
-## React Compiler
+Files are processed on your device. Nothing is uploaded.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- No network requests after load other than the app's own same-origin assets: no CDNs, web fonts or analytics.
+- A strict Content-Security-Policy is applied as a meta tag in the built `index.html`, as a header from `vite preview`, and via `public/_headers` for static hosts.
+- Files stay in memory; they are never written to localStorage, IndexedDB or Cache Storage.
+- The Playwright e2e suite fails if any non-same-origin request is made or the CSP is violated, and `npm run check:privacy` scans the build output for external URLs.
 
-## Expanding the ESLint configuration
+## Requirements
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Node >= 22.13 (required by pdfjs-dist 6).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Scripts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Type-check and build to `dist/` |
+| `npm run preview` | Serve the build (with the CSP header) |
+| `npm test` | Unit tests (Vitest browser mode, Chromium) |
+| `npm run test:e2e` | Playwright end-to-end tests (builds and previews on :4173) |
+| `npm run check:privacy` | Scan the build for external URLs |
+| `npm run verify` | Lint, unit tests, build, privacy check and e2e |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+`public/vendor/ghostscript/` is generated from `node_modules` by the `pre*` scripts (`predev`, `prebuild`, `pretest`) and is not committed.
 
-```
+## Deployment
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Build with `npm run build` and serve `dist/` from any static host. Use a host that honours `public/_headers` (Cloudflare Pages, Netlify) so Web Workers also receive the CSP. Hosts without custom headers, such as GitHub Pages, only get the meta-tag CSP, which does not cover workers. HTTPS is required for install, offline use and sharing.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Third-party licences
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+- Ghostscript (wasm, `@jspawn/ghostscript-wasm`): AGPL-3.0. Fine for personal self-hosting; revisit before distributing.
+- libheif-js: LGPL-3.0
+- pdf-lib: MIT
+- pdf.js (pdfjs-dist): Apache-2.0
