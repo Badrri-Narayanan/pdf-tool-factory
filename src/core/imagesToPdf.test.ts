@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { DEFAULT_IMAGES_TO_PDF_OPTIONS, imagesToPdf, type ImageInput, type ImagesToPdfOptions } from './imagesToPdf';
+import heicUrl from '../test/assets/tiny.heic?url';
 import { TINY_GIF, makeBmp, makeImage, toBlob, withExifOrientation } from '../test/fixtures';
 
 const input = (bytes: Uint8Array, rotation: ImageInput['rotation'] = 0): ImageInput => ({ file: toBlob(bytes), rotation });
@@ -29,6 +30,11 @@ describe('imagesToPdf', () => {
       makeBmp(10, 10),
     ];
     expect(await pageSizes(await imagesToPdf(files.map((f) => input(f)), opts()))).toHaveLength(5);
+  });
+
+  it('converts a HEIC photo into a one-page PDF', async () => {
+    const heic = new Uint8Array(await (await fetch(heicUrl)).arrayBuffer());
+    expect(await pageSizes(await imagesToPdf([input(heic)], opts()))).toEqual([[48, 36]]);
   });
 
   it('keeps phone photos upright by honoring EXIF orientation', async () => {
