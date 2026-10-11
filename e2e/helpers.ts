@@ -70,16 +70,20 @@ export async function downloadPdf(page: Page, buttonName = 'Download') {
  * Moves a file card one position earlier using the keyboard on its drag handle.
  * dnd-kit attaches its key listeners and measures droppables asynchronously after
  * pick-up, so each key press waits for the previous step's screen-reader
- * announcement instead of firing blind.
+ * announcement instead of firing blind (including the initial over-self one and the final drop).
  */
 export async function reorderBefore(page: Page, movingName: string) {
   const announcement = page.locator('[aria-live]').filter({ hasText: /\S/ });
   const handle = page.getByRole('button', { name: `Reorder ${movingName}` });
   await handle.focus();
   await page.keyboard.press('Space');
-  await expect(announcement).toHaveCount(1);
-  const pickedUp = await announcement.textContent();
-  await page.keyboard.press('ArrowLeft');
-  await expect(announcement).not.toHaveText(pickedUp ?? '');
+  await expect(announcement).toHaveText(/was moved over/);
+  const settled = await announcement.textContent();
+  // Droppable rects are measured asynchronously too, so an early arrow key can be a no-op; retry until the announcement changes.
+  await expect(async () => {
+    await page.keyboard.press('ArrowLeft');
+    await expect(announcement).not.toHaveText(settled ?? '', { timeout: 500 });
+  }).toPass({ timeout: 10_000 });
   await page.keyboard.press('Space');
+  await expect(announcement).toHaveText(/was dropped/);
 }

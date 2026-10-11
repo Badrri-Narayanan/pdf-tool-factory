@@ -12,6 +12,10 @@ const router = createHashRouter([
         path: 'images-to-pdf',
         lazy: async () => ({ Component: (await import('../tools/images-to-pdf/ImagesToPdfPage')).default }),
       },
+      {
+        path: 'merge-pdf',
+        lazy: async () => ({ Component: (await import('../tools/merge-pdf/MergePdfPage')).default }),
+      },
       { path: '*', element: <NotFound /> },
     ],
   },
